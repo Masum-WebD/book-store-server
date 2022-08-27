@@ -5,7 +5,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const stripe = require('stripe')("sk_test_51LXxS0A5hc9xpUZ00m3LDFBl7spSr5tFFOxHViSv8AHVthEgRLbzjSUxVP1jLQFkQpcQZ9TbjjDTs6u2rVfywBkO00soLm4jWB");
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 app.use(express.json());
@@ -95,7 +95,7 @@ async function run() {
 
       const token = jwt.sign(
         { email: email },
-        "0d295b70d05f82791065eef657f45ed4a493bbd384f8a06de0627ff553bcbf2ed9bf0f90331a226caa6ff1850bce8ab868677c1432fa6defb7dcc44bc2aa3d9a",
+        process.env.ACCESS_SECRET_TOKEN,
         { expiresIn: "1h" }
       );
 
