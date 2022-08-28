@@ -46,6 +46,7 @@ async function run() {
 
     const verifyAdmin = async (req, res, next) => {
       const requester = req.decoded.email;
+      console.log(requester)
       const requesterAccount = await userCollections.findOne({
         email: requester,
       });
@@ -124,7 +125,7 @@ async function run() {
       const result = await userCollections.deleteOne(filter);
       res.send(result);
     });
-    app.get("/admin/:email", async (req, res) => {
+    app.get("/admin/:email",async (req, res) => {
       const email = req.params.email;
       const user = await userCollections.findOne({ email: email });
       const isAdmin = user.role === "admin";
