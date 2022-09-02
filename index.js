@@ -169,7 +169,7 @@ async function run() {
     app.delete("/cartProduct/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
-      const query = { _id: id };
+      const query = { _id:ObjectId(id) };
       const result = await AddToCartCollections.deleteOne(query);
       res.send(result);
     });
@@ -278,6 +278,15 @@ async function run() {
           });
           res.send({clientSecret: paymentIntent.client_secret})
       })
+      app.post('/add-to-cart', async (req, res) => {
+
+        const order = req.body;
+  
+        const result = await AddToCartCollections.insertOne(order);
+  
+        res.send(result);
+  
+      });
     
   } finally {
   }
