@@ -44,9 +44,9 @@ async function run() {
     const AddToCartCollections = client.db("BookStoreDatabase").collection("cartProduct");
     const OrderCollections = client.db("BookStoreDatabase").collection("order");
 
+    
     const verifyAdmin = async (req, res, next) => {
       const requester = req.decoded.email;
-      console.log(requester)
       const requesterAccount = await userCollections.findOne({
         email: requester,
       });
@@ -125,14 +125,14 @@ async function run() {
       const result = await userCollections.deleteOne(filter);
       res.send(result);
     });
-    app.get("/admin/:email",async (req, res) => {
+    app.get("/admin/:email", async (req, res) => {
       const email = req.params.email;
       const user = await userCollections.findOne({ email: email });
-      const isAdmin = user.role === "admin";
+      const isAdmin = user?.role === "admin";
       res.send({ admin: isAdmin });
     });
 
-    app.put("/user/admin/:email", verifyAdmin, async (req, res) => {
+    app.put("/user/admin/:email",  async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
       const updateDoc = {
@@ -278,27 +278,7 @@ async function run() {
           });
           res.send({clientSecret: paymentIntent.client_secret})
       })
-    // app.post("/create-payment-intent", async (req, res) => {
-    //   const total  = req.body;
-      
-    //   // const subTotal = 
-    //   // const allTotal=parseInt(total.subTotal);
-    //   const subTotal = parseInt(total.subTotal)*100;
-    //   console.log(subTotal)
-    //   const paymentIntent = await stripe.paymentIntents.create({
-    //     amount:subTotal,
-    //     currency: "usd",
-    //     payment_methods_types:['card']
-    //   },
     
-    //   );
-    // console.log(clientSecret)
-    //   res.send({
-    //     clientSecret: paymentIntent.client_secret,
-        
-    //   });
-      
-    // });
   } finally {
   }
 }
