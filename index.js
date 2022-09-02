@@ -44,7 +44,6 @@ async function run() {
     const AddToCartCollections = client.db("BookStoreDatabase").collection("cartProduct");
     const OrderCollections = client.db("BookStoreDatabase").collection("order");
 
-    
     const verifyAdmin = async (req, res, next) => {
       const requester = req.decoded.email;
       const requesterAccount = await userCollections.findOne({
@@ -95,7 +94,7 @@ async function run() {
 
       const token = jwt.sign(
         { email: email },
-        process.env.ACCESS_SECRET_TOKEN,
+        "0d295b70d05f82791065eef657f45ed4a493bbd384f8a06de0627ff553bcbf2ed9bf0f90331a226caa6ff1850bce8ab868677c1432fa6defb7dcc44bc2aa3d9a",
         { expiresIn: "1h" }
       );
 
@@ -132,7 +131,7 @@ async function run() {
       res.send({ admin: isAdmin });
     });
 
-    app.put("/user/admin/:email",  async (req, res) => {
+    app.put("/user/admin/:email", verifyAdmin, async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
       const updateDoc = {
@@ -157,9 +156,20 @@ async function run() {
       );
       res.send(result);
     });
+    // post method to cart
+    app.post('/add-to-cart', async (req, res) => {
+
+      const order = req.body;
+
+      const result = await AddToCartCollections.insertOne(order);
+
+      res.send(result);
+
+    });
+
     //get cart item
     app.get("/cartProduct", async (req, res) => {
-      const email = req.query.email;
+      const email = req.query.email
       const query = { email: email };
       const books = await AddToCartCollections.find(query).toArray();
       res.send(books);
@@ -198,37 +208,35 @@ async function run() {
     });
     // get wishList to mongodb
     app.get("/wishList", async (req, res) => {
-    
-      const email =req.query.email
-      const query = {email :email};
-      const list  =await wishListCollections.find(query).toArray();
+
+      const email = req.query.email
+      const query = { email: email };
+      const list = await wishListCollections.find(query).toArray();
       res.send(list);
     });
     //wishList product add mongodb
     app.put("/wishList", async (req, res) => {
       const product = req.body;
-      const filter = { name: product.name };
+      const filter = { name: product.name }
+
       console.log(filter);
       const options = { upsert: true };
       const updateDoc = {
         $set: product,
       };
-      const result = await wishListCollections.updateOne(
-        filter,
-        updateDoc,
-        options
-      );
-      res.send(result);
-    });
+      const result = await wishListCollections.updateOne(filter, updateDoc, options);
+      res.send(result)
+    })
     //delete wishlist
     app.delete("/wishList/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      console.log(id)
       const query = { _id: id };
       const result = await wishListCollections.deleteOne(query);
-      console.log(result);
-      res.send(result);
-    });
+      console.log(result)
+      res.send(result)
+    })
+
     //search filter
     app.get("/product/", async (req, res) => {
       if (req.query.name) {
@@ -244,11 +252,11 @@ async function run() {
 
     //Order
     app.post('/order', async (req, res) => {
-      const orderItems =req.body
+      const orderItems = req.body
       console.log(orderItems)
       const docs = [
-        { price:orderItems.Price, Quantity:orderItems.Quantity},
-      
+        { price: orderItems.Price, Quantity: orderItems.Quantity },
+
       ];
       const options = { ordered: true };
       const result = await OrderCollections.insertMany(docs, options);
@@ -256,9 +264,9 @@ async function run() {
     })
     //order get
     app.get("/order", async (req, res) => {
-      const email =req.query.email
-      const query = {email :email};
-      const list  =await OrderCollections.find(query).toArray();
+      const email = req.query.email
+      const query = { email: email };
+      const list = await OrderCollections.find(query).toArray();
       res.send(list);
     });
 
@@ -267,33 +275,44 @@ async function run() {
 
 
 
-    app.post('/create-payment-intent', async(req, res)=>{    
+    app.post('/create-payment-intent', async (req, res) => {
       const price = req.body;
-          const amount = (price.price) * 100;
-          const paymentIntent = await stripe.paymentIntents.create({
-              amount : amount,
-              currency:'usd',
-              payment_method_types:['card']
-          });
-          res.send({clientSecret: paymentIntent.client_secret})
-      })
-      app.post('/add-to-cart', async (req, res) => {
-
-        const order = req.body;
-  
-        const result = await AddToCartCollections.insertOne(order);
-  
-        res.send(result);
-  
+      const amount = (price.price) * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
       });
-    
+      res.send({ clientSecret: paymentIntent.client_secret })
+    })
+    // app.post("/create-payment-intent", async (req, res) => {
+    //   const total  = req.body;
+
+    //   // const subTotal = 
+    //   // const allTotal=parseInt(total.subTotal);
+    //   const subTotal = parseInt(total.subTotal)*100;
+    //   console.log(subTotal)
+    //   const paymentIntent = await stripe.paymentIntents.create({
+    //     amount:subTotal,
+    //     currency: "usd",
+    //     payment_methods_types:['card']
+    //   },
+
+    //   );
+    // console.log(clientSecret)
+    //   res.send({
+    //     clientSecret: paymentIntent.client_secret,
+
+    //   });
+
+    /// });
   } finally {
   }
 }
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("our site is running properly");
+  res.send("the site is running properly");
 });
 
 app.listen(port, () => {
