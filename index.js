@@ -168,8 +168,7 @@ async function run() {
     // delete carts items
     app.delete("/cartProduct/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
-      const query = { _id:ObjectId(id) };
+      const query = { _id: ObjectId(id) };
       const result = await AddToCartCollections.deleteOne(query);
       res.send(result);
     });
